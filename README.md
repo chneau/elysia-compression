@@ -14,5 +14,3 @@ import { Elysia } from "elysia";
 
 const app = new Elysia().use(compression()).listen(8080);
 ```
-
-## Config
