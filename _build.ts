@@ -1,11 +1,12 @@
 import { $ } from "bun";
 import dts from "bun-plugin-dts";
+import packageJson from "./package.json";
 
 await $`rm -rf dist`;
 
 await Bun.build({
 	entrypoints: ["src/index.ts"],
-	external: ["elysia"],
+	external: Object.keys(packageJson.dependencies),
 	outdir: "dist",
 	target: "node",
 	minify: true,
