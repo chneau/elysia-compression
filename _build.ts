@@ -8,7 +8,6 @@ await Bun.build({
 	external: ["elysia"],
 	outdir: "dist",
 	target: "node",
-	sourcemap: "linked",
 	minify: true,
 	plugins: [dts()],
 });
