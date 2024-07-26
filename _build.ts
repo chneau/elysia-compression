@@ -10,5 +10,5 @@ await Bun.build({
 	outdir: "dist",
 	target: "node",
 	minify: true,
-	plugins: [dts()],
+	plugins: [dts({ output: { noBanner: !0 } })],
 });
