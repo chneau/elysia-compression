@@ -1,6 +1,6 @@
 {
 	"name": "@chneau/elysia-compression",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"description": "Elysia compression plugin",
@@ -14,7 +14,6 @@
 	"bugs": {
 		"url": "https://github.com/chneau/elysia-compression/issues"
 	},
-	"homepage": "https://github.com/chneau/elysia-compression",
 
 	"scripts": {
 		"build": "bun _build.ts",
