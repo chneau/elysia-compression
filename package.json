@@ -1,9 +1,21 @@
 {
 	"name": "@chneau/elysia-compression",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"description": "Elysia compression plugin",
+	"keywords": ["elysia", "compression"],
+	"author": "chneau",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/chneau/elysia-compression"
+	},
+	"bugs": {
+		"url": "https://github.com/chneau/elysia-compression/issues"
+	},
+	"homepage": "https://github.com/chneau/elysia-compression",
+
 	"scripts": {
 		"build": "bun _build.ts",
 		"npm:publish": "bun run build && npm publish",
