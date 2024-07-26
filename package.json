@@ -1,0 +1,22 @@
+{
+	"name": "@chneau/elysia-compression",
+	"version": "1.0.0",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"description": "Elysia compression plugin",
+	"scripts": {
+		"build": "bun _build.ts",
+		"npm:publish": "bun run build && npm publish",
+		"upgrade": "npm-check-updates --upgrade --install=always --packageManager=bun",
+		"check": "biome check --write --unsafe .",
+		"lint": "tsc --noEmit"
+	},
+	"dependencies": {
+		"elysia": "^1.1.4"
+	},
+	"devDependencies": {
+		"@types/bun": "^1.1.6",
+		"bun-plugin-dts": "^0.2.3",
+		"typescript": "^5.5.4"
+	}
+}
