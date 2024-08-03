@@ -17,11 +17,12 @@
 		"npm:publish": "bun run build && npm publish",
 		"npm:publish:dry-run": "bun run build && npm publish --dry-run",
 		"upgrade": "npm-check-updates --upgrade --install=always --packageManager=bun",
-		"check": "biome check --write --unsafe .",
-		"lint": "tsc --noEmit"
+		"check": "bun run clean; biome check --write --unsafe .",
+		"lint": "tsc --noEmit",
+		"clean": "rm -rf dist"
 	},
 	"dependencies": {
-		"elysia": "^1.1.4"
+		"elysia": "^1.1.5"
 	},
 	"devDependencies": {
 		"@types/bun": "^1.1.6",
