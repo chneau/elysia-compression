@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { staticPlugin } from "@elysiajs/static";
-import { $, sleep } from "bun";
+import { $ } from "bun";
 import { Elysia, error } from "elysia";
 import { compression } from "../src";
 
