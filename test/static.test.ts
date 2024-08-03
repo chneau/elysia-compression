@@ -25,7 +25,7 @@ test("handle errors", async () => {
 		"application/json;charset=utf-8",
 	);
 	expect(res.headers.get("content-encoding")).toBe("gzip");
-	// await server.stop();
+	await server.stop();
 });
 
 test("serve static with compression", async () => {
