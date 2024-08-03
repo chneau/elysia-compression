@@ -12,7 +12,7 @@ test("looking on the right directory for assets", async () => {
 });
 
 test("handle errors", async () => {
-	new Elysia()
+	const server = new Elysia()
 		.use(compression({ threshold: 0 }))
 		.get("/", () => {
 			return error("Not Found", 404);
@@ -23,10 +23,11 @@ test("handle errors", async () => {
 	expect(res.status).toBe(404);
 	expect(res.headers.get("content-type")).toBe("text/plain;charset=utf-8");
 	expect(res.headers.get("content-encoding")).toBe("gzip");
+	await server.stop();
 });
 
 test.skip("serve static with compression", async () => {
-	new Elysia()
+	const server = new Elysia()
 		.use(compression({ threshold: 0 }))
 		.use(
 			staticPlugin({
@@ -45,4 +46,5 @@ test.skip("serve static with compression", async () => {
 	const css = await fetch("http://localhost:3000/index.css");
 	expect(css.headers.get("content-type")).toBe("text/css;charset=utf-8");
 	expect(css.headers.get("content-encoding")).toBe("gzip");
+	await server.stop();
 });
