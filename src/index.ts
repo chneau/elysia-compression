@@ -14,7 +14,12 @@ const isElysiaResponse = (
 	return typeof object === "object" && ELYSIA_RESPONSE in object;
 };
 
-const prepareResponse = (response: unknown, set: Context["set"]) => {
+const isResponse = (response: unknown): response is Response => {
+	if (!response) return false;
+	return typeof response === "object" && "headers" in response;
+};
+
+const prepareResponse = async (response: unknown, set: Context["set"]) => {
 	let isJson = typeof response === "object";
 	let text = isJson ? JSON.stringify(response) : response?.toString() ?? "";
 	let status = set.status;
@@ -22,10 +27,17 @@ const prepareResponse = (response: unknown, set: Context["set"]) => {
 		text = response.response?.toString() ?? "";
 		status = response[ELYSIA_RESPONSE];
 		isJson = typeof response.response === "object";
+		const contentType = isJson ? "application/json" : "text/plain";
+		set.status = status;
+		set.headers["Content-Type"] = `${contentType};charset=utf-8`;
 	}
-	const contentType = isJson ? "application/json" : "text/plain";
-	set.status = status;
-	set.headers["Content-Type"] = `${contentType};charset=utf-8`;
+	if (isResponse(response)) {
+		text = await response.text();
+		status = response.status;
+		set.status = status;
+		set.headers["content-type"] =
+			response.headers.get("content-type") ?? "text/plain";
+	}
 	return text;
 };
 
@@ -54,16 +66,19 @@ export const compression = ({
 		deflate: allowed.includes("deflate") ? deflateSync : undefined,
 		gzip: allowed.includes("gzip") ? gzipSync : undefined,
 	};
-	return new Elysia().mapResponse({ as }, ({ response, set, headers }) => {
-		const text = prepareResponse(response, set);
-		if (text.length < threshold) return toResponse(text, set);
-		for (const encoding of headers["accept-encoding"]?.split(", ") ?? []) {
-			const _encoder = compressEncoders[encoding];
-			if (_encoder) {
-				set.headers["Content-Encoding"] = encoding;
-				return toResponse(_encoder(encoder.encode(text)), set);
+	return new Elysia().mapResponse(
+		{ as },
+		async ({ response, set, headers }) => {
+			const text = await prepareResponse(response, set);
+			if (text.length < threshold) return toResponse(text, set);
+			for (const encoding of headers["accept-encoding"]?.split(", ") ?? []) {
+				const _encoder = compressEncoders[encoding];
+				if (_encoder) {
+					set.headers["Content-Encoding"] = encoding;
+					return toResponse(_encoder(encoder.encode(text)), set);
+				}
 			}
-		}
-		return toResponse(text, set);
-	});
+			return toResponse(text, set);
+		},
+	);
 };

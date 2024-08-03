@@ -26,7 +26,7 @@ test("handle errors", async () => {
 	await server.stop();
 });
 
-test.skip("serve static with compression", async () => {
+test("serve static with compression", async () => {
 	const server = new Elysia()
 		.use(compression({ threshold: 0 }))
 		.use(
@@ -35,15 +35,15 @@ test.skip("serve static with compression", async () => {
 				assets: `${import.meta.dir}/public`,
 			}),
 		)
-		.listen(3000);
+		.listen(3001);
 
-	const html = await fetch("http://localhost:3000");
+	const html = await fetch("http://localhost:3001");
 	expect(html.headers.get("content-type")).toBe("text/html;charset=utf-8");
 	expect(html.headers.get("content-encoding")).toBe("gzip");
-	const js = await fetch("http://localhost:3000/index.js");
+	const js = await fetch("http://localhost:3001/index.js");
 	expect(js.headers.get("content-type")).toBe("text/javascript;charset=utf-8");
 	expect(js.headers.get("content-encoding")).toBe("gzip");
-	const css = await fetch("http://localhost:3000/index.css");
+	const css = await fetch("http://localhost:3001/index.css");
 	expect(css.headers.get("content-type")).toBe("text/css;charset=utf-8");
 	expect(css.headers.get("content-encoding")).toBe("gzip");
 	await server.stop();
