@@ -1,6 +1,6 @@
 import { expect, test } from "bun:test";
 import { staticPlugin } from "@elysiajs/static";
-import { $ } from "bun";
+import { $, sleep } from "bun";
 import { Elysia, error } from "elysia";
 import { compression } from "../src";
 
@@ -38,6 +38,11 @@ test.skip("serve static with compression", async () => {
 
 	const html = await fetch("http://localhost:3000");
 	expect(html.headers.get("content-type")).toBe("text/html;charset=utf-8");
+	expect(html.headers.get("content-encoding")).toBe("gzip");
 	const js = await fetch("http://localhost:3000/index.js");
 	expect(js.headers.get("content-type")).toBe("text/javascript;charset=utf-8");
+	expect(js.headers.get("content-encoding")).toBe("gzip");
+	const css = await fetch("http://localhost:3000/index.css");
+	expect(css.headers.get("content-type")).toBe("text/css;charset=utf-8");
+	expect(css.headers.get("content-encoding")).toBe("gzip");
 });
