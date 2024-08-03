@@ -17,7 +17,7 @@ const app = new Elysia().use(compression()).listen(8080);
 
 ## Changelog
 
-### [1.0.7] - 2024-08-03
+### [1.0.8] - 2024-08-03
 
 #### Fixed
 
