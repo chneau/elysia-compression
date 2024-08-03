@@ -8,7 +8,7 @@ test("looking on the right directory for assets", async () => {
 	const files = await $`ls ${import.meta.dir}/public`
 		.text()
 		.then((x) => x.split("\n").filter((x) => x));
-	expect(files).toEqual(["index.html", "index.js"]);
+	expect(files).toEqual(["index.css", "index.html", "index.js"]);
 });
 
 test("handle errors", async () => {
@@ -19,9 +19,10 @@ test("handle errors", async () => {
 		})
 		.listen(3000);
 
-	const res = await fetch("http://localhost:3000/404");
+	const res = await fetch("http://localhost:3000");
 	expect(res.status).toBe(404);
 	expect(res.headers.get("content-type")).toBe("text/plain;charset=utf-8");
+	expect(res.headers.get("content-encoding")).toBe("gzip");
 });
 
 test.skip("serve static with compression", async () => {
@@ -35,7 +36,7 @@ test.skip("serve static with compression", async () => {
 		)
 		.listen(3000);
 
-	const html = await fetch("http://localhost:3000/");
+	const html = await fetch("http://localhost:3000");
 	expect(html.headers.get("content-type")).toBe("text/html;charset=utf-8");
 	const js = await fetch("http://localhost:3000/index.js");
 	expect(js.headers.get("content-type")).toBe("text/javascript;charset=utf-8");
