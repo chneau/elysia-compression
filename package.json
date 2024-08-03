@@ -19,12 +19,14 @@
 		"upgrade": "npm-check-updates --upgrade --install=always --packageManager=bun",
 		"check": "bun run clean; biome check --write --unsafe .",
 		"lint": "tsc --noEmit",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"test": "bun test --watch"
 	},
 	"dependencies": {
 		"elysia": "^1.1.5"
 	},
 	"devDependencies": {
+		"@elysiajs/static": "^1.1.0",
 		"@types/bun": "^1.1.6",
 		"bun-plugin-dts": "^0.2.3",
 		"typescript": "^5.5.4"
