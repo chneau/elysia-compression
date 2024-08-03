@@ -1,7 +1,7 @@
 import { expect, mock, test } from "bun:test";
 import { staticPlugin } from "@elysiajs/static";
 import { $ } from "bun";
-import { Elysia } from "elysia";
+import { Elysia, error } from "elysia";
 import { compression } from "../src";
 
 const random = mock(() => Math.random());
@@ -13,9 +13,22 @@ test("looking on the right directory for assets", async () => {
 	expect(files).toEqual(["index.html", "index.js"]);
 });
 
+test("handle errors", async () => {
+	new Elysia()
+		.use(compression({ threshold: 0 }))
+		.get("/", () => {
+			return error("Not Found", 404);
+		})
+		.listen(3000);
+
+	const res = await fetch("http://localhost:3000/404");
+	expect(res.status).toBe(404);
+	expect(res.headers.get("content-type")).toBe("text/plain;charset=utf-8");
+});
+
 test("serve static with compression", async () => {
 	new Elysia()
-		.use(compression())
+		.use(compression({ threshold: 0 }))
 		.use(
 			staticPlugin({
 				prefix: "/",
