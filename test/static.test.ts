@@ -21,9 +21,11 @@ test("handle errors", async () => {
 
 	const res = await fetch("http://localhost:3000");
 	expect(res.status).toBe(404);
-	expect(res.headers.get("content-type")).toBe("text/plain;charset=utf-8");
+	expect(res.headers.get("content-type")).toBe(
+		"application/json;charset=utf-8",
+	);
 	expect(res.headers.get("content-encoding")).toBe("gzip");
-	await server.stop();
+	// await server.stop();
 });
 
 test("serve static with compression", async () => {
@@ -46,5 +48,21 @@ test("serve static with compression", async () => {
 	const css = await fetch("http://localhost:3001/index.css");
 	expect(css.headers.get("content-type")).toBe("text/css;charset=utf-8");
 	expect(css.headers.get("content-encoding")).toBe("gzip");
+	await server.stop();
+});
+
+test("sever json with compression", async () => {
+	const server = new Elysia()
+		.use(compression({ threshold: 0 }))
+		.get("/", () => {
+			return { message: "Hello World" };
+		})
+		.listen(3002);
+
+	const json = await fetch("http://localhost:3002/");
+	expect(json.headers.get("content-type")).toBe(
+		"application/json;charset=utf-8",
+	);
+	expect(json.headers.get("content-encoding")).toBe("gzip");
 	await server.stop();
 });

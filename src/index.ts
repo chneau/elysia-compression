@@ -23,13 +23,14 @@ const prepareResponse = async (response: unknown, set: Context["set"]) => {
 	let isJson = typeof response === "object";
 	let text = isJson ? JSON.stringify(response) : response?.toString() ?? "";
 	let status = set.status;
+	const contentType = isJson ? "application/json" : "text/plain";
 	if (isElysiaResponse(response)) {
 		text = response.response?.toString() ?? "";
 		status = response[ELYSIA_RESPONSE];
 		isJson = typeof response.response === "object";
-		const contentType = isJson ? "application/json" : "text/plain";
 		set.status = status;
 		set.headers["Content-Type"] = `${contentType};charset=utf-8`;
+		return text;
 	}
 	if (isResponse(response)) {
 		text = await response.text();
@@ -37,7 +38,9 @@ const prepareResponse = async (response: unknown, set: Context["set"]) => {
 		set.status = status;
 		set.headers["content-type"] =
 			response.headers.get("content-type") ?? "text/plain";
+		return text;
 	}
+	set.headers["Content-Type"] = `${contentType};charset=utf-8`;
 	return text;
 };
 
