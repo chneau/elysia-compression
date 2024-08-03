@@ -14,3 +14,15 @@ import { Elysia } from "elysia";
 
 const app = new Elysia().use(compression()).listen(8080);
 ```
+
+## Changelog
+
+### [1.0.7] - 2024-08-03
+
+### Added
+
+- Tests.
+
+#### Fixed
+
+- Working with elysia static.
