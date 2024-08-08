@@ -63,6 +63,22 @@ test("serve json with compression", async () => {
 	expect(json.headers.get("content-type")).toBe(
 		"application/json;charset=utf-8",
 	);
+	expect(await json.json()).toEqual({ message: "Hello World" });
 	expect(json.headers.get("content-encoding")).toBe("gzip");
+	await server.stop();
+});
+
+test("redirect properly", async () => {
+	const server = new Elysia()
+		.use(compression({ threshold: 0 }))
+		.get("/", () => "hello")
+		.get("/redirect", (ctx) => ctx.redirect("/", 307))
+		.listen(3003);
+
+	const res = await fetch("http://localhost:3003/redirect");
+	expect(res.status).toBe(200);
+	expect(await res.text()).toBe("hello");
+	expect(res.headers.get("content-encoding")).toBe("gzip");
+	expect(res.headers.get("content-type")).toBe("text/plain;charset=utf-8");
 	await server.stop();
 });

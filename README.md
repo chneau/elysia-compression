@@ -17,6 +17,12 @@ const app = new Elysia().use(compression()).listen(8080);
 
 ## Changelog
 
+### [1.0.9] - 2024-08-03
+
+#### Fixed
+
+- Working with elysia static, json and errors.
+
 ### [1.0.8] - 2024-08-03
 
 #### Fixed

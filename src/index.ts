@@ -72,6 +72,8 @@ export const compression = ({
 	return new Elysia().mapResponse(
 		{ as },
 		async ({ response, set, headers }) => {
+			const status = (response as Response).status;
+			if (status >= 300 && status < 400) return toResponse(response, set);
 			const text = await prepareResponse(response, set);
 			if (text.length < threshold) return toResponse(text, set);
 			for (const encoding of headers["accept-encoding"]?.split(", ") ?? []) {
