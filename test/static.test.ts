@@ -51,7 +51,7 @@ test("serve static with compression", async () => {
 	await server.stop();
 });
 
-test("sever json with compression", async () => {
+test("serve json with compression", async () => {
 	const server = new Elysia()
 		.use(compression({ threshold: 0 }))
 		.get("/", () => {
