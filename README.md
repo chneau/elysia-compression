@@ -17,6 +17,12 @@ const app = new Elysia().use(compression()).listen(8080);
 
 ## Changelog
 
+### [1.0.10] - 2024-08-27
+
+#### Fixed
+
+- Fixed potential null pointer exception.
+
 ### [1.0.9] - 2024-08-03
 
 #### Fixed
