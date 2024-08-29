@@ -72,7 +72,14 @@ export const compression = ({
 	return new Elysia().mapResponse(
 		{ as },
 		async ({ response, set, headers }) => {
-			const status = (response as Response | undefined)?.status;
+			let status = (response as Response | undefined)?.status;
+			if (
+				typeof response === "object" &&
+				"response" in response &&
+				typeof response.response === "number"
+			)
+				status = response.response;
+			if (!status && typeof set.status === "number") status = set.status;
 			if (!status) return response;
 			if (status >= 300 && status < 400) return toResponse(response, set);
 			const text = await prepareResponse(response, set);

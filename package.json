@@ -1,6 +1,6 @@
 {
 	"name": "@chneau/elysia-compression",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"description": "Elysia compression plugin",
@@ -24,7 +24,7 @@
 		"test": "bun test --watch"
 	},
 	"dependencies": {
-		"elysia": "^1.1.8"
+		"elysia": "^1.1.9"
 	},
 	"devDependencies": {
 		"@elysiajs/static": "^1.1.0",

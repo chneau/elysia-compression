@@ -17,6 +17,12 @@ const app = new Elysia().use(compression()).listen(8080);
 
 ## Changelog
 
+### [1.0.11] - 2024-08-29
+
+#### Fixed
+
+- Fixed all tests. Compression if working again!
+
 ### [1.0.10] - 2024-08-27
 
 #### Fixed
