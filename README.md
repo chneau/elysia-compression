@@ -17,6 +17,23 @@ const app = new Elysia().use(compression()).listen(8080);
 
 ## Changelog
 
+### [1.0.12] - 2026-10-02
+
+#### Changed
+
+- Updated to the Elysia 1.4 API (`status` instead of the removed `error`).
+- Replaced `bun-plugin-dts` with `tsc` for declaration generation.
+
+#### Fixed
+
+- Custom status responses with an object payload are now serialized as JSON
+  instead of `[object Object]`.
+
+#### Added
+
+- More tests covering thresholds, allowed/negotiated encodings, custom status
+  codes, redirects, explicit `Response` content types and async handlers.
+
 ### [1.0.11] - 2024-08-29
 
 #### Fixed

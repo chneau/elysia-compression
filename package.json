@@ -1,35 +1,45 @@
 {
 	"name": "@chneau/elysia-compression",
-	"version": "1.0.11",
+	"version": "1.0.12",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"description": "Elysia compression plugin",
-	"keywords": ["elysia", "compression"],
+	"keywords": [
+		"elysia",
+		"compression"
+	],
 	"author": "chneau",
 	"license": "MIT",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/chneau/elysia-compression.git"
 	},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "bun _build.ts",
 		"npm:fix": "npm pkg fix",
 		"npm:publish": "bun run build && npm publish",
 		"npm:publish:dry-run": "bun run build && npm publish --dry-run",
-		"upgrade": "npm-check-updates --upgrade --install=always --packageManager=bun",
-		"check": "bun run clean; biome check --write --unsafe .",
+		"upgrade": "bun update --latest",
+		"check": "bun run --sequential --no-exit-on-error check:clean check:deno check:oxlint check:biome check:export lint",
 		"lint": "tsc --noEmit",
 		"clean": "rm -rf dist",
-		"test": "bun test --watch"
+		"test": "bun test --watch",
+		"check:clean": "rm -rf dist out build",
+		"check:deno": "deno fmt --use-tabs --quiet",
+		"check:oxlint": "oxlint --fix-dangerously --fix-suggestions --fix --quiet",
+		"check:biome": "timeout 3s biome check --write --unsafe --vcs-enabled=true --vcs-client-kind=git --vcs-use-ignore-file=true .",
+		"check:export": "ts-unused-exports tsconfig.json",
+		"all": "bun run --sequential --no-exit-on-error upgrade check"
 	},
 	"dependencies": {
-		"elysia": "^1.1.9"
+		"elysia": "^1.4.30"
 	},
 	"devDependencies": {
-		"@elysiajs/static": "^1.1.0",
-		"@types/bun": "^1.1.8",
-		"bun-plugin-dts": "^0.2.3",
-		"typescript": "^5.5.4"
+		"@elysiajs/static": "^1.4.10",
+		"@types/bun": "^1.4.2",
+		"typescript": "^7.0.2"
 	}
 }

@@ -1,18 +1,14 @@
-import { type InputType, deflateSync, gzipSync } from "node:zlib";
+import { deflateSync, gzipSync, type InputType } from "node:zlib";
 import Elysia, {
 	type Context,
-	ELYSIA_RESPONSE,
-	type error,
+	ElysiaCustomStatusResponse,
 	type LifeCycleType,
-	mapResponse,
 } from "elysia";
 
 const isElysiaResponse = (
 	object: unknown,
-): object is ReturnType<typeof error> => {
-	if (!object) return false;
-	return typeof object === "object" && ELYSIA_RESPONSE in object;
-};
+): object is ElysiaCustomStatusResponse<number, unknown> =>
+	object instanceof ElysiaCustomStatusResponse;
 
 const isResponse = (response: unknown): response is Response => {
 	if (!response) return false;
@@ -20,14 +16,18 @@ const isResponse = (response: unknown): response is Response => {
 };
 
 const prepareResponse = async (response: unknown, set: Context["set"]) => {
+	if (typeof response === "function") {
+		return prepareResponse(await response(), set);
+	}
 	let isJson = typeof response === "object";
-	let text = isJson ? JSON.stringify(response) : response?.toString() ?? "";
+	let text = isJson ? JSON.stringify(response) : (response?.toString() ?? "");
 	let status = set.status;
 	const contentType = isJson ? "application/json" : "text/plain";
 	if (isElysiaResponse(response)) {
-		text = response.response?.toString() ?? "";
-		status = response[ELYSIA_RESPONSE];
-		isJson = typeof response.response === "object";
+		const value = response.response;
+		isJson = typeof value === "object" && value !== null;
+		text = isJson ? JSON.stringify(value) : (value?.toString() ?? "");
+		status = response.code;
 		set.status = status;
 		set.headers["Content-Type"] = `${contentType};charset=utf-8`;
 		return text;
@@ -44,8 +44,14 @@ const prepareResponse = async (response: unknown, set: Context["set"]) => {
 	return text;
 };
 
-const toResponse = (text: unknown, set: Context["set"]) => {
-	const res = mapResponse(text, set);
+const toResponse = (body: unknown, set: Context["set"]) => {
+	if (body instanceof Response) return body;
+	const res = new Response(body as BodyInit, {
+		status: typeof set.status === "number" ? set.status : undefined,
+		headers: Object.fromEntries(
+			Object.entries(set.headers).map(([key, value]) => [key, String(value)]),
+		),
+	});
 	set.status = undefined;
 	set.cookie = undefined;
 	set.headers = {};
@@ -72,15 +78,12 @@ export const compression = ({
 	return new Elysia().mapResponse(
 		{ as },
 		async ({ response, set, headers }) => {
-			let status = (response as Response | undefined)?.status;
-			if (
-				typeof response === "object" &&
-				"response" in response &&
-				typeof response.response === "number"
-			)
-				status = response.response;
+			let status = response instanceof Response ? response.status : undefined;
+			if (response instanceof ElysiaCustomStatusResponse) {
+				status = response.code;
+			}
 			if (!status && typeof set.status === "number") status = set.status;
-			if (!status) return response;
+			if (!status) return;
 			if (status >= 300 && status < 400) return toResponse(response, set);
 			const text = await prepareResponse(response, set);
 			if (text.length < threshold) return toResponse(text, set);
