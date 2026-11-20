@@ -246,3 +246,132 @@ test("compresses async handlers", async () => {
 	expect(await res.json()).toEqual({ async: true });
 	await server.stop();
 });
+
+test("keeps every header of an explicit Response when not compressing", async () => {
+	const app = new Elysia().use(compression()).get(
+		"/",
+		() =>
+			new Response("plain", {
+				status: 201,
+				headers: {
+					"content-type": "application/json",
+					"set-cookie": "session=abc; Path=/; HttpOnly; SameSite=Lax",
+					"x-custom": "must-survive",
+				},
+			}),
+	);
+
+	const res = await app.handle(new Request("http://localhost/"));
+	expect(res.status).toBe(201);
+	expect(res.headers.get("set-cookie")).toBe(
+		"session=abc; Path=/; HttpOnly; SameSite=Lax",
+	);
+	expect(res.headers.get("x-custom")).toBe("must-survive");
+	expect(res.headers.get("content-type")).toBe("application/json");
+	expect(res.headers.get("content-encoding")).toBeNull();
+	expect(await res.text()).toBe("plain");
+});
+
+test("keeps every header of an explicit Response while compressing", async () => {
+	const payload = "x".repeat(2000);
+	const app = new Elysia()
+		.use(compression({ threshold: 0 }))
+		.onAfterHandle(({ set }) => {
+			set.headers["x-plugin"] = "yes";
+		})
+		.get(
+			"/",
+			() =>
+				new Response(payload, {
+					status: 202,
+					headers: {
+						"content-type": "application/json",
+						"set-cookie": "session=abc; Path=/; HttpOnly; SameSite=Lax",
+						"x-custom": "must-survive",
+					},
+				}),
+		);
+
+	const res = await app.handle(
+		new Request("http://localhost/", {
+			headers: { "accept-encoding": "gzip" },
+		}),
+	);
+	expect(res.status).toBe(202);
+	expect(res.headers.get("content-encoding")).toBe("gzip");
+	expect(res.headers.get("set-cookie")).toBe(
+		"session=abc; Path=/; HttpOnly; SameSite=Lax",
+	);
+	expect(res.headers.get("x-custom")).toBe("must-survive");
+	expect(res.headers.get("x-plugin")).toBe("yes");
+	expect(res.headers.get("content-type")).toBe("application/json");
+	expect(
+		new TextDecoder().decode(Bun.gunzipSync(await res.arrayBuffer())),
+	).toBe(payload);
+});
+
+test("keeps multiple Set-Cookie values on an explicit Response", async () => {
+	const app = new Elysia().use(compression({ threshold: 0 })).get("/", () => {
+		const headers = new Headers();
+		headers.append("set-cookie", "a=1; Path=/");
+		headers.append("set-cookie", "b=2; Path=/");
+		return new Response("y".repeat(2000), { headers });
+	});
+
+	const res = await app.handle(
+		new Request("http://localhost/", {
+			headers: { "accept-encoding": "gzip" },
+		}),
+	);
+	expect(res.headers.getSetCookie()).toEqual(["a=1; Path=/", "b=2; Path=/"]);
+	expect(
+		new TextDecoder().decode(Bun.gunzipSync(await res.arrayBuffer())),
+	).toBe("y".repeat(2000));
+});
+
+test("does not recompress an already encoded Response", async () => {
+	const app = new Elysia().use(compression({ threshold: 0 })).get(
+		"/",
+		() =>
+			new Response("z".repeat(2000), {
+				headers: {
+					"content-encoding": "br",
+					"x-custom": "must-survive",
+				},
+			}),
+	);
+
+	const res = await app.handle(
+		new Request("http://localhost/", {
+			headers: { "accept-encoding": "gzip" },
+		}),
+	);
+	expect(res.headers.get("content-encoding")).toBe("br");
+	expect(res.headers.get("x-custom")).toBe("must-survive");
+	expect(await res.text()).toBe("z".repeat(2000));
+});
+
+test("keeps headers of a mounted handler", async () => {
+	const app = new Elysia().use(compression({ threshold: 0 })).mount(
+		"/mounted",
+		() =>
+			new Response("w".repeat(2000), {
+				headers: {
+					"set-cookie": "session=abc; Path=/",
+					"x-custom": "must-survive",
+				},
+			}),
+	);
+
+	const res = await app.handle(
+		new Request("http://localhost/mounted", {
+			headers: { "accept-encoding": "gzip" },
+		}),
+	);
+	expect(res.headers.get("content-encoding")).toBe("gzip");
+	expect(res.headers.get("set-cookie")).toBe("session=abc; Path=/");
+	expect(res.headers.get("x-custom")).toBe("must-survive");
+	expect(
+		new TextDecoder().decode(Bun.gunzipSync(await res.arrayBuffer())),
+	).toBe("w".repeat(2000));
+});
